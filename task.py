@@ -1,5 +1,6 @@
 import numpy as np
 from physics_sim import PhysicsSim
+from scipy.spatial import distance
 
 class Task():
     """Task (environment) that defines the goal and provides feedback to the agent."""
@@ -19,21 +20,33 @@ class Task():
         self.action_repeat = 1
 
         self.state_size = self.action_repeat * 12
-        self.action_low = 0
+        self.action_low = 1
         self.action_high = 900
         self.action_size = 4
 
         # Goal
         self.target_pos = target_pos if target_pos is not None else np.array([0., 0., 10.])
 
-    def get_reward(self):
+    def get_flight_parameters(self):
+        remaining_distance = distance.euclidean(self.sim.pose[:3], self.target_pos)
+        vertical_velocity = self.sim.v[2]
+        height = self.sim.pose[2]
+        return remaining_distance, vertical_velocity, height
+
+    def get_reward(self, done):
         """Uses current pose of sim to return reward."""
-        reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
-        #print('Pos: ', self.sim.pose[2], 'Target: ', self.target_pos[2], 'abs: ', abs(self.sim.pose[2] - self.target_pos[2]), 'min: ', min(abs(self.sim.pose[2] - self.target_pos[2]), 20.0))
+        #reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
         #reward = -min(abs(self.sim.pose[2] - self.target_pos[2]), 20.0)
-        #print('reward: ', reward)
         #if self.sim.pose[2] >= self.target_pos[2]:
         #    reward += 10.0
+        #reward = 1 - 0.3*abs(self.sim.pose[:3] - self.target_pos).sum() + 0.2 * min(self.sim.v[2], 10) + 0.1 * max(self.sim.pose[2], 10)
+        remaining_distance, vertical_velocity, height = self.get_flight_parameters()
+        reward = 1 - 3*remaining_distance + 0.6 * min(vertical_velocity, 10) + 0.9*max(height, 10)
+
+        # penalize crash
+        if done and self.sim.time < self.sim.runtime:
+            reward -= 30
+
         return reward
 
     def step(self, rotor_speeds):
@@ -42,7 +55,7 @@ class Task():
         pose_all = []
         for _ in range(self.action_repeat):
             done = self.sim.next_timestep(rotor_speeds) # update the sim pose and velocities
-            reward += self.get_reward()
+            reward += self.get_reward(done)
             pose_all.extend([self.sim.pose, self.sim.v, self.sim.angular_v])
         next_state = np.concatenate(pose_all)
         return next_state, reward, done
