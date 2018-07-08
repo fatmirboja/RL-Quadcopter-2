@@ -38,7 +38,7 @@ class PolicySearch_Agent():
         if done:
             self.learn()
 
-    def act(self, state):
+    def act(self, state, explore=True):
         # Choose action based on given state and policy
         action = np.dot(state, self.w)  # simple linear policy
         return action
@@ -54,4 +54,3 @@ class PolicySearch_Agent():
             self.w = self.best_w
             self.noise_scale = min(2.0 * self.noise_scale, 3.2)
         self.w = self.w + self.noise_scale * np.random.normal(size=self.w.shape)  # equal noise in all directions
-        
