@@ -41,13 +41,21 @@ class Task():
         #    reward += 10.0
         #reward = 1 - 0.3*abs(self.sim.pose[:3] - self.target_pos).sum() + 0.2 * min(self.sim.v[2], 10) + 0.1 * max(self.sim.pose[2], 10)
         remaining_distance, vertical_velocity, height = self.get_flight_parameters()
-        reward = 1 - 3*remaining_distance + 0.6 * min(vertical_velocity, 10) + 0.9*max(height, 10)
+        #take_off_reward = self.sim.time*max(height, 10) if self.sim.time < 0.8 else 0
+        take_off_reward = -min(abs(self.sim.pose[2] - self.target_pos[2]), 10) + min(vertical_velocity, 1)
+
+        #reward = 1 - 3*remaining_distance + take_off_reward
+
+        reward = take_off_reward - remaining_distance
+
+        if height < 0.01:
+            reward -= 5
 
         # penalize crash
-        if done and self.sim.time < self.sim.runtime:
-            reward -= 30
+        #if done and self.sim.time < self.sim.runtime:
+        #    reward -= 10
 
-        return reward
+        return np.tanh(reward)
 
     def step(self, rotor_speeds):
         """Uses action to obtain next state, reward, done."""
