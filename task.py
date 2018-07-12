@@ -36,24 +36,29 @@ class Task():
     def get_reward(self, done):
         """Uses current pose of sim to return reward."""
         #reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
-        #reward = -min(abs(self.sim.pose[2] - self.target_pos[2]), 20.0)
+        #reward = 1 - min(abs(self.sim.pose[2] - self.target_pos[2]), 20.0)
         #if self.sim.pose[2] >= self.target_pos[2]:
         #    reward += 10.0
         #reward = 1 - 0.3*abs(self.sim.pose[:3] - self.target_pos).sum() + 0.2 * min(self.sim.v[2], 10) + 0.1 * max(self.sim.pose[2], 10)
-        remaining_distance, vertical_velocity, height = self.get_flight_parameters()
-        #take_off_reward = self.sim.time*max(height, 10) if self.sim.time < 0.8 else 0
-        take_off_reward = -min(abs(self.sim.pose[2] - self.target_pos[2]), 10) + min(vertical_velocity, 1)
 
-        #reward = 1 - 3*remaining_distance + take_off_reward
+        #remaining_distance, vertical_velocity, height = self.get_flight_parameters()
+        #reward = 1 - 0.5*min(abs(self.sim.pose[2] - self.target_pos[2]), 10) - (0.8*remaining_distance)**2
 
-        reward = take_off_reward - remaining_distance
-
-        if height < 0.01:
-            reward -= 5
+        #if height < 0.0001:
+        #    reward -= 5
 
         # penalize crash
         #if done and self.sim.time < self.sim.runtime:
         #    reward -= 10
+
+        x, y, z = self.sim.pose[:3]
+        v_x, v_y, v_z = self.sim.v
+
+        reward = 0.5 + min(v_z, 1) - 0.005*(v_x**2 + v_y**2) - 0.05*x**2 - 0.05*y**2 - 0.3*abs(self.sim.pose[:3] - self.target_pos).sum()
+
+        # penalize crash
+        if done and self.sim.time < self.sim.runtime:
+            reward -= 1
 
         return np.tanh(reward)
 
