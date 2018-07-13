@@ -34,23 +34,7 @@ class Task():
         return remaining_distance, vertical_velocity, height
 
     def get_reward(self, done):
-        """Uses current pose of sim to return reward."""
-        #reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
-        #reward = 1 - min(abs(self.sim.pose[2] - self.target_pos[2]), 20.0)
-        #if self.sim.pose[2] >= self.target_pos[2]:
-        #    reward += 10.0
-        #reward = 1 - 0.3*abs(self.sim.pose[:3] - self.target_pos).sum() + 0.2 * min(self.sim.v[2], 10) + 0.1 * max(self.sim.pose[2], 10)
-
-        #remaining_distance, vertical_velocity, height = self.get_flight_parameters()
-        #reward = 1 - 0.5*min(abs(self.sim.pose[2] - self.target_pos[2]), 10) - (0.8*remaining_distance)**2
-
-        #if height < 0.0001:
-        #    reward -= 5
-
-        # penalize crash
-        #if done and self.sim.time < self.sim.runtime:
-        #    reward -= 10
-
+        """Uses current pose and velocity of sim to return reward."""
         x, y, z = self.sim.pose[:3]
         v_x, v_y, v_z = self.sim.v
 
