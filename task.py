@@ -46,16 +46,18 @@ class Task():
         velocity_penalty = abs(abs(current_pos - self.target_pos).sum() - abs(self.sim.v).sum())
         deviation_penalty = 0.005*(v_x**2 + v_y**2) + 0.05*x**2 + 0.05*y**2
 
-        reward = 1 + 0.2*min(v_z, 5) - 0.8*remaining_distance - 0.9*deviation_penalty - 2*velocity_penalty - 3*angular_velocity_penalty
+        reward = 1 + 0.4*min(v_z, 5) - 0.2*remaining_distance - 0.2*deviation_penalty - 0.5*velocity_penalty - 0.9*angular_velocity_penalty
+        
+        #print('v_z', 0.5*min(v_z, 5), 'remaining_dist', - 0.2*remaining_distance, 'deviation', - 0.3*deviation_penalty, 'velocity', - 0.3*velocity_penalty, 'ang_vel', - 0.9*angular_velocity_penalty)
 
         if done:
             # penalize crash
             if self.sim.time < self.sim.runtime:
-                reward -= 30
+                reward -= 10
             # extra reward if the quadcopter is near the target position
             elif remaining_distance < 1.5:
                 print('You did it!')
-                reward += 30
+                reward += 10
 
         return np.tanh(reward)
 
