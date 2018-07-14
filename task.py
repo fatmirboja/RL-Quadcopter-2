@@ -35,14 +35,25 @@ class Task():
 
     def get_reward(self, done):
         """Uses current pose and velocity of sim to return reward."""
-        x, y, z = self.sim.pose[:3]
+        current_pos = self.sim.pose[:3]
+        # Euclidean coordinates
+        x, y, z = current_pos
+        # velocities
         v_x, v_y, v_z = self.sim.v
 
-        reward = 0.5 + min(v_z, 10) - 0.005*(v_x**2 + v_y**2) - 0.05*x**2 - 0.05*y**2 - 0.3*abs(self.sim.pose[:3] - self.target_pos).sum()
+        remaining_distance = abs(current_pos - self.target_pos).sum()
+        angular_velocity_penalty = abs(self.sim.angular_v).sum()
+        velocity_penalty = abs(abs(current_pos - self.target_pos).sum() - abs(self.sim.v).sum())
+        reward = 0.5 + min(v_z, 1) - 0.005*(v_x**2 + v_y**2) - 0.05*x**2 - 0.05*y**2
+                 - 0.3*remaining_distance - velocity_penalty - angular_velocity_penalty
 
-        # penalize crash
-        if done and self.sim.time < self.sim.runtime:
-            reward -= 1
+        if done:
+            # penalize crash
+            if self.sim.time < self.sim.runtime:
+                reward -= 10
+            # extra reward if the quadcopter is near the target position
+            else if remaining_distance < 1
+                reward += 10
 
         return np.tanh(reward)
 
