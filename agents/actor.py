@@ -31,12 +31,12 @@ class Actor:
 
         # Add hidden layers
         net = layers.Dense(units=32, activation='relu')(states)
-        #net = layers.BatchNormalization()(net)
-        #net = layers.Dropout(0.2)(net)
+        net = layers.BatchNormalization()(net)
+        net = layers.Dropout(0.2)(net)
         net = layers.Dense(units=64, activation='relu')(net)
-        #net = layers.BatchNormalization()(net)
-        #net = layers.Dropout(0.2)(net)
-        net = layers.Dense(units=64, activation='relu')(net)
+        net = layers.BatchNormalization()(net)
+        net = layers.Dropout(0.2)(net)
+        #net = layers.Dense(units=64, activation='relu')(net)
         #net = layers.BatchNormalization()(net)
         #net = layers.Dropout(0.2)(net)
 
@@ -60,7 +60,7 @@ class Actor:
         # Incorporate any additional losses here (e.g. from regularizers)
 
         # Define optimizer and training function
-        optimizer = optimizers.Adam(lr=0.0001)
+        optimizer = optimizers.Adam(lr=0.000001)
         updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss)
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],
