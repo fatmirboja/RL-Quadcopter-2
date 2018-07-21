@@ -48,7 +48,7 @@ class Task():
 
         #reward = 1 + 2*min(v_z, 6) - 0.1*deviation_penalty - 0.2*velocity_penalty - 0.5*angular_velocity_penalty + z
 
-        reward = 1. + 1.5*min(v_z, 5) - 0.7*angular_velocity_penalty - 0.1*velocity_penalty
+        reward = 1. + 2.5*min(v_z, 5) + min(z, 10) - 0.6*angular_velocity_penalty - 0.1*velocity_penalty
 
         if done:
             # penalize crash
