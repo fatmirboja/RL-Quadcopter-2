@@ -46,8 +46,6 @@ class Task():
         velocity_penalty = abs(abs(current_pos - self.target_pos).sum() - abs(self.sim.v).sum())
         deviation_penalty = 0.005*(v_x**2 + v_y**2) + 0.05*x**2 + 0.05*y**2
 
-        #reward = 1 + 2*min(v_z, 6) - 0.1*deviation_penalty - 0.2*velocity_penalty - 0.5*angular_velocity_penalty + z
-
         reward = 1. + 2.5*min(v_z, 5) + min(z, 10) - 0.6*angular_velocity_penalty - 0.1*velocity_penalty
 
         if done:
